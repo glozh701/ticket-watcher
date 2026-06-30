@@ -1,0 +1,35 @@
+name: Watch Aichi-Nagoya Ticket
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run watcher
+        env:
+          PRODUCT_ID: "452"
+          SESSION_CODE: "ELS08"
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          NOTIFY_TO: ${{ secrets.NOTIFY_TO }}
+          NOTIFY_FROM: ${{ secrets.NOTIFY_FROM }}
+        run: python watch_ticket.py
+
+      - name: Commit status file
+        run: |
+          git config user.name "ticket-watcher"
+          git config user.email "ticket-watcher@users.noreply.github.com"
+          git add last_status.json || true
+          git commit -m "Update ticket status" || echo "No changes"
+          git push || true
