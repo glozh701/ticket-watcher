@@ -1,0 +1,4 @@
+.env
+cron.log
+last_status.json
+*.swp
